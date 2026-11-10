@@ -1,0 +1,32 @@
+/* Zero external dependencies. All records are local to the visitor's browser. */
+(() => {
+  'use strict';
+  const document = typeof globalThis.document !== 'undefined' ? globalThis.document : {querySelectorAll:()=>[],getElementById:()=>null};
+  const prefix='lbai-v1-';
+  const $=id=>document.getElementById(id);
+  const read=(key,fallback)=>{try { const v=localStorage.getItem(prefix+key);return v===null?fallback:JSON.parse(v); } catch(e) {return fallback;} };
+  const save=(key,value)=>{try {localStorage.setItem(prefix+key,JSON.stringify(value));}catch(e){toast('当前浏览器无法保存进度');}};
+  const toast=message=>{const el=$('toast');if(!el)return;el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500);};
+  const copy=async text=>{
+    try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);}else{const e=document.createElement('textarea');e.value=text;e.style.position='fixed';e.style.opacity='0';document.body.append(e);e.select();if(!document.execCommand('copy'))throw Error('copy');e.remove();}toast('已复制到剪贴板');}catch(e){toast('复制失败，请手动选择文本');}
+  };
+  document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copy(b.dataset.copy)));
+  document.querySelectorAll('[data-copy-target]').forEach(b=>b.addEventListener('click',()=>copy($(b.dataset.copyTarget)?.innerText||'')));
+  const search=$('chapterSearch');
+  if(search){search.addEventListener('input',()=>{const term=search.value.trim().toLowerCase();let n=0;document.querySelectorAll('.chapter-card').forEach(c=>{const show=c.dataset.search.includes(term);c.hidden=!show;if(show)n++;});$('resultCount').textContent=`${n} 章`;});}
+  // Chapter completion. Kept separate from the daily checklist.
+  document.querySelectorAll('.toggle-done').forEach(b=>{const key=b.dataset.key;const update=()=>{const done=read(key,false);b.textContent=done?'已完成 · 点击取消':'标记本章完成 ✓';};b.addEventListener('click',()=>{save(key,!read(key,false));update();toast('章节状态已保存在此设备');});update();});
+  const days=[...document.querySelectorAll('[data-day]')];
+  const updateDays=()=>{const progress=read('days',{});let completed=0;days.forEach(el=>{el.checked=!!progress[el.dataset.day];el.closest('.day-row').classList.toggle('checked',el.checked);if(el.checked)completed++;});if($('doneCount'))$('doneCount').textContent=`${completed} / 30`;if($('progressBar'))$('progressBar').style.width=`${(completed/30)*100}%`;};
+  days.forEach(el=>el.addEventListener('change',()=>{const old=read('days',{});old[el.dataset.day]=el.checked;save('days',old);updateDays();}));
+  if(days.length){updateDays();$('exportProgress')?.addEventListener('click',()=>download('本地生意AI获客-30天进度.json',JSON.stringify({app:'local-business-ai-handbook',version:1,days:read('days',{})},null,2),'application/json'));$('resetProgress')?.addEventListener('click',()=>{if(confirm('确定清空当前浏览器的30天进度吗？')){save('days',{});updateDays();}});$('importProgress')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>100000)throw Error('文件过大');const p=JSON.parse(await f.text());if(p.app!=='local-business-ai-handbook'||p.version!==1||!p.days||typeof p.days!=='object'||Array.isArray(p.days))throw Error('格式不正确');const clean={};for(let n=1;n<=30;n++)clean[n]=p.days[n]===true;save('days',clean);updateDays();toast('进度已导入');}catch(err){toast('导入失败：'+err.message);}finally{e.target.value='';}});}
+  function download(filename,contents,mime){const blob=new Blob([contents],{type:mime+';charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+  const audit=[...document.querySelectorAll('[data-audit]')];
+  if(audit.length){const state=read('audit',{});audit.forEach(el=>{el.checked=!!state[el.dataset.audit];el.addEventListener('change',()=>{state[el.dataset.audit]=el.checked;save('audit',state);auditCount();});});auditCount();}
+  function auditCount(){if($('auditCount'))$('auditCount').textContent=`${audit.filter(e=>e.checked).length} / 10`;}
+  // Pure function exported for CLI unit test; intentionally does not depend on UI or storage.
+  function calculate(v){const error=[];for(const [k,x] of Object.entries(v)){if(!Number.isFinite(x)||x<0)error.push(k+' 必须是非负数字');}if(v.visits>v.leads)error.push('到店数不能大于合格咨询数');if(v.orders>v.visits)error.push('成交数不能大于到店数');if(!Number.isInteger(v.leads)||!Number.isInteger(v.visits)||!Number.isInteger(v.orders))error.push('咨询/到店/成交必须为整数');if(error.length)return {error};const unit=v.revenue-v.variable;const marketing=v.leads*v.cpl+v.fixed+v.hours*v.hourly;const net=v.orders*unit-marketing;return {unit,marketing,net,conv:v.leads?v.orders/v.leads:null,cac:v.orders?marketing/v.orders:null,margin:v.orders*v.revenue?net/(v.orders*v.revenue):null,error:[]};}
+  if(typeof module!=='undefined'&&module.exports)module.exports={calculate};
+  const fields=['revenue','variable','cpl','leads','visits','orders','fixed','hours','hourly'];
+  if($('revenue')){const currency=n=>Number.isFinite(n)?new Intl.NumberFormat('zh-CN',{style:'currency',currency:'CNY',maximumFractionDigits:2}).format(n):'—';const pct=n=>n===null?'不适用':(n*100).toFixed(1)+'%';function updateCalc(){const v={};for(const key of fields){const input=$(key);v[key]=input.value.trim()===''?NaN:Number(input.value);}const r=calculate(v);$('calcErrors').textContent=r.error.join('；');if(r.error.length){['unitContribution','conv','net','cac'].forEach(id=>$(id).textContent='—');$('calcInsight').textContent='请先修正输入。';return;} $('unitContribution').textContent=currency(r.unit);$('conv').textContent=pct(r.conv);$('net').textContent=currency(r.net);$('cac').textContent=r.cac===null?'不适用':currency(r.cac);$('calcInsight').textContent=r.unit<=0?'单笔贡献不为正：应先修复服务经济模型，再考虑获客。':r.net<0?'在这些假设下，本期新增净贡献为负，建议缩小预算并复核线索质量。': '按你输入的数字，新增净贡献为非负；仍需要实际订单与交付记录验证。';window.__localBusinessCalc={inputs:v,result:r};}fields.forEach(k=>$(k).addEventListener('input',updateCalc));updateCalc();$('exportCalc')?.addEventListener('click',()=>{const current=window.__localBusinessCalc;if(!current||current.result.error.length){toast('请先修正输入');return;}const {inputs,result}=current;download('获客利润测算-教学记录.txt',`本地生意 AI 获客测算（数据由使用者输入）\n输入：${JSON.stringify(inputs,null,2)}\n结果：${JSON.stringify(result,null,2)}\n公式：成交数×(实收-变动成本)-咨询数×单条线索成本-其他推广费-新增人力工时×小时成本\n注意：这不是会计净利润，不含既有固定费用；样例不是任何真实门店成绩。`,'text/plain');});}
+})();

@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const {calculate}=require('../assets/app.js');
+const base={revenue:400,variable:120,cpl:25,leads:30,visits:15,orders:6,fixed:0,hours:6,hourly:35};
+const r=calculate(base);
+assert.deepEqual(r.error,[]);
+assert.equal(r.unit,280);
+assert.equal(r.marketing,960);
+assert.equal(r.net,720);
+assert.equal(r.conv,.2);
+assert.equal(r.cac,160);
+const z=calculate({...base,leads:0,visits:0,orders:0});
+assert.equal(z.conv,null);assert.equal(z.cac,null);assert.equal(z.net,-210);
+assert.equal(calculate({...base,leads:2,visits:3}).error.length>0,true);
+assert.equal(calculate({...base,visits:4,orders:6}).error.length>0,true);
+assert.equal(calculate({...base,orders:-1}).error.length>0,true);
+assert.equal(calculate({...base,leads:1.5}).error.length>0,true);
+assert.equal(calculate({...base,revenue:50}).net<0,true);
+console.log('Calculator tests passed (valid, zero denominators, invalid funnel, negative contribution).');
