@@ -74,6 +74,20 @@ class ProjectChecks(unittest.TestCase):
             self.assertIn(u,main)
         self.assertIn('AIPMAndy',main)
 
+    def test_business_contact_is_visible_on_every_page(self):
+        # Contract: the owner's WeChat ID and corporate website must not be
+        # buried only in the README or the final advertisement.
+        self.assertIn('**业务微信：`AIPMAndy`**', (ROOT/'README.md').read_text(encoding='utf-8'))
+        for p in SITE.rglob('*.html'):
+            html=p.read_text(encoding='utf-8')
+            self.assertIn('class="contact-strip"', html, str(p))
+            self.assertIn('href="https://www.a6no1.cn/"', html, str(p))
+            self.assertIn('data-copy="AIPMAndy"', html, str(p))
+        home=(SITE/'index.html').read_text(encoding='utf-8')
+        self.assertIn('class="hero-contact"', home)
+        self.assertIn('企业官网：', home)
+        self.assertIn('业务微信：', home)
+
     def test_templates_are_present(self):
         templates=list((ROOT/'templates').glob('*.csv'))
         self.assertEqual(len(templates),12)
