@@ -4,10 +4,14 @@
 
 **作者：AI 酋长 Andy** · [个人官网](https://metaver.vip/) · [星觉科技](https://www.a6no1.cn/) · [企业 AI + IP 获客](https://metaver.vip/services) · 业务微信：`AIPMAndy`
 
-**开源状态：本地项目包已创建并通过自动测试；此版本尚未确认 GitHub 远程仓库已创建或 Pages 已发布。** 发布后预期：
-- 预定 GitHub 仓库：`https://github.com/AIPMAndy/local-business-ai-growth-handbook`
-- 预定网站地址：`https://aipmandy.github.io/local-business-ai-growth-handbook/`
-- 上线前不要在推广文案中把这两个预定地址称作“已上线”。
+## 免费教程与业务联系
+
+**🌐 [立即使用在线教程](https://aipmandy.github.io/local-business-ai-growth-handbook/)** ｜ **[GitHub 开源仓库](https://github.com/AIPMAndy/local-business-ai-growth-handbook)**
+
+> **企业官网（星觉科技）：[https://www.a6no1.cn/](https://www.a6no1.cn/)**  
+> **业务微信：`AIPMAndy`**（微信搜索添加，备注“本地生意”）
+>
+> **广告 · 作者商业服务：** 免费教程可直接使用。需要实体店 AI 获客诊断、内容方案或企业合作，可通过以上渠道联系。
 
 ![本地生意AI获客保姆级攻略](assets/social-preview.svg)
 
