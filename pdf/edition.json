@@ -1,0 +1,27 @@
+{
+  "repo": "local-business-ai-growth-handbook",
+  "title": "本地生意 AI 获客攻略",
+  "date": "2026-11-13",
+  "source_commit": "24d1bf43facad9a999280630322ba5fd712d4d26",
+  "pages": 71,
+  "sections": 39,
+  "source_files": [
+    "START-HERE.md",
+    "data/content.json",
+    "docs/OPERATIONS.md",
+    "examples/anonymous-auto-service.md",
+    "docs/SOURCES.md"
+  ],
+  "website": "https://aipmandy.github.io/local-business-ai-growth-handbook/",
+  "bytes": 864026,
+  "sha256": "9abef4e852d7f2ddc1c56a98d1a00c32e42c6a061e1af1a3a9214f54f250456b",
+  "pdf_path": "pdf/local-business-ai-growth-handbook-guide.pdf",
+  "contacts": {
+    "personal_website": "https://metaver.vip/",
+    "company_website": "https://www.a6no1.cn/",
+    "wechat": "AIPMAndy",
+    "public_account": "AI 酋长 Andy"
+  },
+  "edition": "A5 · 黑白金实操系列 · PDF 2026.11",
+  "notes": "PDF编排日期不代表所有外部政策与价格的重新核验日期。源文件许可与案例标注继续适用。"
+}
