@@ -3,7 +3,7 @@
 from __future__ import annotations
 from html import escape as E
 from pathlib import Path
-import json, shutil, sys, re
+import json, shutil, sys, re, hashlib
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'_site'
 D=json.loads((ROOT/'data/content.json').read_text(encoding='utf-8'))
@@ -12,6 +12,7 @@ SITE='https://aipmandy.github.io/local-business-ai-growth-handbook/'
 SERVICE='https://metaver.vip/services'
 HOME='https://metaver.vip/'
 CORP='https://www.a6no1.cn/'
+PDF_PUBLIC='downloads/local-business-ai-growth-handbook-guide.pdf'
 phases=['定位','经营','需求','发现','内容','AI生产','生产','转化','成交','复购','数据','规模化','风险']
 def h(s):return E(str(s),quote=True)
 def link(path,depth=0):return ('../'*depth)+path
@@ -22,7 +23,7 @@ def brand_card(compact=False):
     text='企业 AI + IP 获客｜把专业经验变成咨询与成交' if not compact else '让真实的本地生意，被更多需要的人找到。'
     return f'''<aside class="ad-panel" aria-label="广告：作者的商业服务"><div><div class="ad-kicker">广告 · 作者商业服务</div><h3>星觉科技 · 企业 AI + IP 获客</h3><p>{h(text)}。免费手册教通用方法；如需定制诊断与落地协助，可进一步沟通。</p><div class="ad-links"><a href="{SERVICE}" target="_blank" rel="noopener noreferrer">查看企业获客服务 ↗</a><a href="{CORP}" target="_blank" rel="noopener noreferrer">星觉科技官网 ↗</a><a href="{HOME}" target="_blank" rel="noopener noreferrer">AI 酋长 Andy 官网 ↗</a><button type="button" class="copy" data-copy="AIPMAndy">复制作者微信 AIPMAndy</button></div></div></aside>'''
 def nav(depth=0,active=''):
-    entries=[('index.html','首页'),('plan.html','30天计划'),('tools.html','测算工具'),('prompts.html','AI 提示词'),('scripts.html','口播脚本'),('cases.html','行业案例'),('sources.html','官方来源')]
+    entries=[('index.html','首页'),('plan.html','30天计划'),('tools.html','测算工具'),('prompts.html','AI 提示词'),('scripts.html','口播脚本'),('cases.html','行业案例'),('sources.html','官方来源'),(PDF_PUBLIC,'免费下载 PDF')]
     items=''.join(f'<a class="{"active" if active==u else ""}" href="{link(u,depth)}">{h(t)}</a>' for u,t in entries)
     return f'<header class="top"><div class="container nav-inner"><a href="{link("index.html",depth)}" class="logo"><span class="logo-emblem">A</span><span>LOCAL <strong>GROWTH</strong><small>AI · PLAYBOOK</small></span></a><nav aria-label="主导航">{items}</nav><a class="top-cta" href="{SERVICE}" target="_blank" rel="noopener noreferrer">企业服务 ↗</a></div></header><div class="contact-strip" aria-label="作者业务联系方式"><div class="container contact-inner"><span>业务合作 · 星觉科技</span><a href="{CORP}" target="_blank" rel="noopener noreferrer">企业官网：www.a6no1.cn ↗</a><span>微信：<strong>AIPMAndy</strong></span><button type="button" data-copy="AIPMAndy" aria-label="复制微信号 AIPMAndy">复制微信号</button></div></div>'
 def foot(depth=0):
@@ -38,11 +39,11 @@ def card(ch,depth=0):
 def titleblock(kicker,title,subtitle):return f'<div class="section-title">{label(kicker)}<h1>{h(title)}</h1><p class="lead">{h(subtitle)}</p></div>'
 
 def homepage():
-    hero=f'''<section class="hero"><div class="container hero-grid"><div><div class="status-line"><span class="dot"></span>免费开源 · 2026 年版 · 从 0 到真实咨询</div><h1>附近有客户，<br><em>为什么找不到你？</em></h1><p class="hero-lead">不是教你“每天发十条视频”，而是把一家实体店从<strong>被发现、被信任、被咨询、被预约、到店、成交到复购</strong>整条链路打通。AI 负责提效，结果靠真实记录验证。</p><div class="hero-actions"><a class="btn primary" href="plan.html">从第 1 天开始 <span>→</span></a><a class="btn secondary" href="tools.html">测算一笔客值 <span>↗</span></a></div><div class="hero-contact"><span>企业官网：<a href="{CORP}" target="_blank" rel="noopener noreferrer">www.a6no1.cn ↗</a></span><span>业务微信：<strong>AIPMAndy</strong></span><button type="button" data-copy="AIPMAndy">复制微信号</button></div><div class="hero-sub"><span>26 章步骤</span><span>30 天执行</span><span>24 条口播</span><span>18 套提示词</span></div></div><div class="hero-art" role="img" aria-label="从本地发现到成交复购的增长路径"><div class="art-grid"></div><span class="art-label">LOCAL BUSINESS / AI GROWTH</span><div class="funnel-flow"><div><span class="flow-icon">◎</span><b>被附近客户找到</b><small>地图与平台</small></div><span class="flow-arrow">↓</span><div><span class="flow-icon">✦</span><b>看到专业与信任</b><small>真实内容与口碑</small></div><span class="flow-arrow">↓</span><div><span class="flow-icon">◇</span><b>咨询 · 到店 · 成交</b><small>透明服务与数据</small></div></div><div class="art-metric">不承诺流量。<strong>只验证真实生意。</strong></div></div></div></section>'''
+    hero=f'''<section class="hero"><div class="container hero-grid"><div><div class="status-line"><span class="dot"></span>免费开源 · 2026 年版 · 从 0 到真实咨询</div><h1>附近有客户，<br><em>为什么找不到你？</em></h1><p class="hero-lead">不是教你“每天发十条视频”，而是把一家实体店从<strong>被发现、被信任、被咨询、被预约、到店、成交到复购</strong>整条链路打通。AI 负责提效，结果靠真实记录验证。</p><div class="hero-actions"><a class="btn primary" href="plan.html">从第 1 天开始 <span>→</span></a><a class="btn secondary" href="tools.html">测算一笔客值 <span>↗</span></a><a class="btn secondary" href="{PDF_PUBLIC}" download>免费下载 71 页 PDF <span>↓</span></a></div><div class="hero-contact"><span>企业官网：<a href="{CORP}" target="_blank" rel="noopener noreferrer">www.a6no1.cn ↗</a></span><span>业务微信：<strong>AIPMAndy</strong></span><button type="button" data-copy="AIPMAndy">复制微信号</button></div><div class="hero-sub"><span>26 章步骤</span><span>30 天执行</span><span>24 条口播</span><span>18 套提示词</span></div></div><div class="hero-art" role="img" aria-label="从本地发现到成交复购的增长路径"><div class="art-grid"></div><span class="art-label">LOCAL BUSINESS / AI GROWTH</span><div class="funnel-flow"><div><span class="flow-icon">◎</span><b>被附近客户找到</b><small>地图与平台</small></div><span class="flow-arrow">↓</span><div><span class="flow-icon">✦</span><b>看到专业与信任</b><small>真实内容与口碑</small></div><span class="flow-arrow">↓</span><div><span class="flow-icon">◇</span><b>咨询 · 到店 · 成交</b><small>透明服务与数据</small></div></div><div class="art-metric">不承诺流量。<strong>只验证真实生意。</strong></div></div></div></section>'''
     funnel=''.join(f'<div class="step-flow"><span>{str(i+1).zfill(2)}</span><strong>{t}</strong><small>{s}</small></div>' for i,(t,s) in enumerate([('发现','地图与本地搜索'),('信任','口碑与专业内容'),('咨询','明确问题与范围'),('到店','预约与交付'),('成交','净贡献与体验'),('复购','持续服务关系')]))
     route=''.join(f'<a class="route-item" href="chapters/{idx}.html"><span>{n}</span><strong>{t}</strong><small>{s}</small><span class="route-arrow">↗</span></a>' for n,idx,t,s in [('01','03','先做诊断','知道问题在哪里'),('02','06','让附近人找到','高德/百度/点评'),('03','14','AI做30个选题','客户原话出发'),('04','19','承接有效咨询','不只要点赞'),('05','23','算清楚真实回报','订单和利润说话')])
     topics=''.join(card(ch) for ch in D['chapters'])
-    return hero+f'''<section class="section container"><div class="section-header">{label('FIRST PRINCIPLES')}<h2>每一步都要回到真实生意。</h2><p>没有成交链路，单纯增加浏览量只是在制造忙碌。</p></div><div class="funnel-strip">{funnel}</div></section><section class="section soft-bg"><div class="container split"><div>{label('QUICK START')}<h2>新手直接走这 5 步。</h2><p class="muted">每一步都有可交付的凭证。你做完了才算通过，而不是“看懂了就算会”。</p>{brand_card(True)}</div><div class="route-list">{route}</div></div></section><section class="section container" id="chapters"><div class="section-header">{label('THE FIELD MANUAL')}<h2>26 章，从开店到复购。</h2><p>教程不是灵感清单，而是可以逐项验收的操作手册。</p></div><div class="filter-line"><input id="chapterSearch" type="search" placeholder="搜索：地图、抖音、复购、毛利、AI…" aria-label="搜索章节"><span id="resultCount" aria-live="polite">26 章</span></div><div class="chapter-grid" id="chapterGrid">{topics}</div></section><section class="section soft-bg"><div class="container"><div class="section-header">{label('GET STARTED')}<h2>工具、案例、模板直接拿走。</h2></div><div class="feature-grid"><a href="plan.html"><span>↗</span><h3>30天执行清单</h3><p>每天只做一件重要事，自动记录勾选进度。</p></a><a href="tools.html"><span>↗</span><h3>获客贡献测算器</h3><p>输入你自己的真实数据，算净贡献而非空喊收入。</p></a><a href="prompts.html"><span>↗</span><h3>18套可复制提示词</h3><p>定位、地图、拍摄、回复、风控直接复制使用。</p></a><a href="scripts.html"><span>↗</span><h3>24条口播脚本</h3><p>从真实问题出发，替换为你自己可证明的素材。</p></a><a href="cases.html"><span>↗</span><h3>6个行业场景</h3><p>匿名经验和模拟教学分级。</p></a></div></div></section><section class="section container"><div class="section-header">{label('A NOTE ON PRIVACY')}<h2>家庭生意，只讲方法，不晒隐私。</h2><p>项目包含一个匿名汽车服务业场景，不披露具体门店、城市、个人信息、客户资料、合同、收入或可反向识别的细节。</p></div>{brand_card()}</section>'''
+    return hero+f'''<section class="section container"><div class="section-header">{label('FIRST PRINCIPLES')}<h2>每一步都要回到真实生意。</h2><p>没有成交链路，单纯增加浏览量只是在制造忙碌。</p></div><div class="funnel-strip">{funnel}</div></section><section class="section soft-bg"><div class="container split"><div>{label('QUICK START')}<h2>新手直接走这 5 步。</h2><p class="muted">每一步都有可交付的凭证。你做完了才算通过，而不是“看懂了就算会”。</p>{brand_card(True)}</div><div class="route-list">{route}</div></div></section><section class="section container" id="chapters"><div class="section-header">{label('THE FIELD MANUAL')}<h2>26 章，从开店到复购。</h2><p>教程不是灵感清单，而是可以逐项验收的操作手册。</p></div><div class="filter-line"><input id="chapterSearch" type="search" placeholder="搜索：地图、抖音、复购、毛利、AI…" aria-label="搜索章节"><span id="resultCount" aria-live="polite">26 章</span></div><div class="chapter-grid" id="chapterGrid">{topics}</div></section><section class="section soft-bg"><div class="container"><div class="section-header">{label('GET STARTED')}<h2>工具、案例、模板直接拿走。</h2></div><div class="feature-grid"><a href="plan.html"><span>↗</span><h3>30天执行清单</h3><p>每天只做一件重要事，自动记录勾选进度。</p></a><a href="tools.html"><span>↗</span><h3>获客贡献测算器</h3><p>输入你自己的真实数据，算净贡献而非空喊收入。</p></a><a href="prompts.html"><span>↗</span><h3>18套可复制提示词</h3><p>定位、地图、拍摄、回复、风控直接复制使用。</p></a><a href="scripts.html"><span>↗</span><h3>24条口播脚本</h3><p>从真实问题出发，替换为你自己可证明的素材。</p></a><a href="cases.html"><span>↗</span><h3>6个行业场景</h3><p>匿名经验和模拟教学分级。</p></a><a href="{PDF_PUBLIC}" download><span>↓</span><h3>71 页免费 PDF</h3><p>A5 便携阅读版，离线可读；含来源、模板与自选服务联系方式。</p></a></div></div></section><section class="section container"><div class="section-header">{label('A NOTE ON PRIVACY')}<h2>家庭生意，只讲方法，不晒隐私。</h2><p>项目包含一个匿名汽车服务业场景，不披露具体门店、城市、个人信息、客户资料、合同、收入或可反向识别的细节。</p></div>{brand_card()}</section>'''
 
 def chapter(ch):
     num=int(ch['id']); before=D['chapters'][num-2] if num>1 else None;after=D['chapters'][num] if num<len(D['chapters']) else None
@@ -113,9 +114,27 @@ def build():
         p=OUT/filename;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(html,encoding='utf-8')
     # Machine-readable content is bundled for transparent reuse; no private client data.
     shutil.copy2(ROOT/'data/content.json',OUT/'content.json')
+    # Release the already-reviewed PDF together with the Pages site. Never
+    # silently publish a stale or missing book; edition.json is the source of truth.
+    edition=json.loads((ROOT/'pdf/edition.json').read_text(encoding='utf-8'))
+    source=ROOT/edition['pdf_path']
+    if not source.is_file():
+        raise FileNotFoundError(f"PDF missing: {source}")
+    if source.stat().st_size != edition['bytes']:
+        raise ValueError("PDF size differs from pdf/edition.json")
+    digest=hashlib.sha256(source.read_bytes()).hexdigest()
+    if digest != edition['sha256']:
+        raise ValueError("PDF SHA-256 differs from pdf/edition.json")
+    target=OUT/PDF_PUBLIC
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copy2(source,target)
+    if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
+        raise ValueError("Pages PDF did not match the reviewed edition")
     from xml.sax.saxutils import escape as X
     urls=''.join(f'<url><loc>{X(SITE+name)}</loc><lastmod>{D["updated"]}</lastmod></url>' for name in pages)
     (OUT/'sitemap.xml').write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',encoding='utf-8')
+    (OUT/'robots.txt').write_text('User-agent: *\\nAllow: /\\nSitemap: '+SITE+'sitemap.xml\\n',encoding='utf-8')
+    (OUT/'llms.txt').write_text('# 本地生意 AI 获客保姆级攻略\\n\\n官方站点：'+SITE+'\\n免费PDF：'+SITE+PDF_PUBLIC+'\\n章节索引：'+SITE+'index.html#chapters\\n作者：AI 酋长 Andy\\n核对来源：'+SITE+'sources.html\\n使用前请复核平台最新规则；教学模拟不是经营结果。\\n',encoding='utf-8')
     (OUT/'.nojekyll').write_text('',encoding='utf-8')
     (OUT/'404.html').write_text(pages['index.html'],encoding='utf-8')
     print(f'Built {len(pages)} content pages +404; output={OUT}')
