@@ -98,29 +98,29 @@ class ProjectChecks(unittest.TestCase):
         origin='https://aipmandy.github.io/local-business-ai-growth-handbook/'
         robots=(SITE/'robots.txt').read_text(encoding='utf-8')
         self.assertEqual(robots.splitlines(),['User-agent: *','Allow: /','Sitemap: '+origin+'sitemap.xml'])
-        self.assertNotIn('\\\\n',robots,'robots.txt must contain real newlines')
+        self.assertNotIn('\\n',robots,'robots.txt must contain real newlines')
         llms=(SITE/'llms.txt').read_text(encoding='utf-8')
         self.assertGreater(len(llms.splitlines()),5)
-        self.assertNotIn('\\\\n',llms,'llms.txt must contain real newlines')
+        self.assertNotIn('\\n',llms,'llms.txt must contain real newlines')
         root=ET.fromstring((SITE/'sitemap.xml').read_text(encoding='utf-8'))
         urls=[el.text for el in root.findall('.//{*}loc')]
         self.assertEqual(len(urls),34)
         self.assertEqual(len(set(urls)),len(urls))
-        self.assertEqual(set(urls),{origin+str(p.relative_to(SITE)).replace('\\\\','/') for p in SITE.rglob('*.html') if p.name!='404.html'})
+        self.assertEqual(set(urls),{origin+str(p.relative_to(SITE)).replace('\\','/') for p in SITE.rglob('*.html') if p.name!='404.html'})
         for p in SITE.rglob('*.html'):
             if p.name=='404.html':continue
             html=p.read_text(encoding='utf-8')
-            blocks=re.findall(r'<script type="application/ld\\+json">(.*?)</script>',html,re.S)
+            blocks=re.findall(r'<script type="application/ld\+json">(.*?)</script>',html,re.S)
             self.assertEqual(len(blocks),1,str(p))
             structured=json.loads(blocks[0])
-            self.assertEqual(structured['url'],origin+str(p.relative_to(SITE)).replace('\\\\','/'))
+            self.assertEqual(structured['url'],origin+str(p.relative_to(SITE)).replace('\\','/'))
             self.assertEqual(structured['author']['url'],'https://metaver.vip/')
             self.assertEqual(structured['dateModified'],DATA['updated'])
         source=(SITE/'sources.html').read_text(encoding='utf-8')
         self.assertIn('<time datetime="2026-11-10">2026-11-10</time>',source)
-        schema=json.loads(re.search(r'<script type="application/ld\\+json">(.*?)</script>',source,re.S).group(1))
+        schema=json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>',source,re.S).group(1))
         self.assertEqual(schema['citation'],[e['url'] for e in DATA['sources']])
-        self.assertNotIn('今天完成核验',source)
+        self.assertIn('不是实时核验',source)
 
     def test_security_guardrails(self):
         code=(ROOT/'assets/app.js').read_text(encoding='utf-8')
