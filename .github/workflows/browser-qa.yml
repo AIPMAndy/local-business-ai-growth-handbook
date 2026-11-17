@@ -8,6 +8,13 @@ on:
       - 'data/**'
       - 'tests/browser_smoke.mjs'
       - '.github/workflows/browser-qa.yml'
+  pull_request:
+    paths:
+      - 'scripts/build.py'
+      - 'assets/**'
+      - 'data/**'
+      - 'tests/**'
+      - '.github/workflows/browser-qa.yml'
   workflow_dispatch:
 permissions:
   contents: read
