@@ -49,32 +49,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/deploy-pages@v4
         id: deployment
-      - name: Verify website and checksum-identical PDF online
+      - name: Rebuild release and independently verify 13 public Pages assets
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          python3 - <<'PY'
-          import hashlib,json,os,time,urllib.request
-          from pathlib import Path
-          meta=json.loads(Path("pdf/edition.json").read_text(encoding="utf-8"))
-          url=os.environ["PAGES_URL"].rstrip("/")+"/"
-          pdf=url+"downloads/local-business-ai-growth-handbook-guide.pdf"
-          index=url+"index.html"
-          for attempt in range(12):
-              try:
-                  with urllib.request.urlopen(pdf,timeout=25) as r: binary=r.read()
-                  with urllib.request.urlopen(index,timeout=25) as r: homepage=r.read().decode("utf-8")
-                  if hashlib.sha256(binary).hexdigest()!=meta["sha256"]:
-                      raise ValueError("Online PDF differs from reviewed source")
-                  if "downloads/local-business-ai-growth-handbook-guide.pdf" not in homepage:
-                      raise ValueError("Online homepage not updated with the PDF download")
-                  if "AIPMAndy" not in homepage or "a6no1.cn" not in homepage:
-                      raise ValueError("Online business contacts are missing")
-                  print("Verified downloadable",meta["pages"],"page PDF",pdf)
-                  break
-              except Exception as exc:
-                  if attempt==11:
-                      raise
-                  print(f"CDN update pending (try {attempt+1}/12): {exc}")
-                  time.sleep(5)
-          PY
+          python3 scripts/build.py
+          python3 scripts/verify_live.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: local-business-live-verification
+          path: qa/live-verification.json
+          if-no-files-found: ignore
