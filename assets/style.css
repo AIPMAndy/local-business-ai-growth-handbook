@@ -16,3 +16,6 @@
 .contact-inner{justify-content:flex-start;font-size:11px;gap:6px 12px}
 .hero-contact{font-size:12px;gap:8px 12px}
 }
+
+/* Diagnostic actions: local export / explicit reset, keyboard and touch friendly. */
+.audit-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:16px}.audit-actions button{min-height:44px}.source-date{margin:18px 0 28px;font-size:13px;line-height:1.8;color:#536784}.source-date time{font-weight:700;color:#243e65}@media(max-width:480px){.audit-actions{justify-content:stretch}.audit-actions button{flex:1 1 100%}}
