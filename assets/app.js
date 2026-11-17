@@ -23,7 +23,22 @@
   if(days.length){updateDays();$('exportProgress')?.addEventListener('click',()=>download('本地生意AI获客-30天进度.json',JSON.stringify({app:'local-business-ai-handbook',version:1,days:read('days',{})},null,2),'application/json'));$('resetProgress')?.addEventListener('click',()=>{if(confirm('确定清空当前浏览器的30天进度吗？')){save('days',{});updateDays();}});$('importProgress')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>100000)throw Error('文件过大');const p=JSON.parse(await f.text());if(p.app!=='local-business-ai-handbook'||p.version!==1||!p.days||typeof p.days!=='object'||Array.isArray(p.days))throw Error('格式不正确');const clean={};for(let n=1;n<=30;n++)clean[n]=p.days[n]===true;save('days',clean);updateDays();toast('进度已导入');}catch(err){toast('导入失败：'+err.message);}finally{e.target.value='';}});}
   function download(filename,contents,mime){const blob=new Blob([contents],{type:mime+';charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   const audit=[...document.querySelectorAll('[data-audit]')];
-  if(audit.length){const state=read('audit',{});audit.forEach(el=>{el.checked=!!state[el.dataset.audit];el.addEventListener('change',()=>{state[el.dataset.audit]=el.checked;save('audit',state);auditCount();});});auditCount();}
+  if(audit.length){
+    const state=read('audit',{});
+    audit.forEach(el=>{el.checked=state[el.dataset.audit]===true;el.addEventListener('change',()=>{state[el.dataset.audit]=el.checked;save('audit',state);auditCount();});});
+    auditCount();
+    $('exportAudit')?.addEventListener('click',()=>{
+      const passed=audit.filter(el=>el.checked).length;
+      const lines=audit.map((el,i)=>`${String(i+1).padStart(2,'0')}. [${el.checked?'已通过':'待核验'}] ${el.closest('label')?.querySelector('span')?.textContent?.trim()||el.dataset.audit}`);
+      const report=['门店 10 项体检｜由使用者自行勾选',`已通过：${passed} / ${audit.length}`,'',...lines,'','未勾选=待核验，不意味着不合格；这不是第三方认证或经营结果。','资料仅在本机生成，不上传客户资料。','AI 酋长 Andy｜微信 AIPMAndy｜https://metaver.vip/｜https://www.a6no1.cn/｜https://metaver.vip/services'].join('\n');
+      download('门店10项体检-本地记录.txt',report,'text/plain');
+    });
+    $('resetAudit')?.addEventListener('click',()=>{
+      if(!confirm('确定清空此浏览器的10项门店体检勾选吗？'))return;
+      audit.forEach(el=>{el.checked=false;});
+      save('audit',{});auditCount();toast('体检勾选已清空');
+    });
+  }
   function auditCount(){if($('auditCount'))$('auditCount').textContent=`${audit.filter(e=>e.checked).length} / 10`;}
   // Pure function exported for CLI unit test; intentionally does not depend on UI or storage.
   function calculate(v){const error=[];for(const [k,x] of Object.entries(v)){if(!Number.isFinite(x)||x<0)error.push(k+' 必须是非负数字');}if(v.visits>v.leads)error.push('到店数不能大于合格咨询数');if(v.orders>v.visits)error.push('成交数不能大于到店数');if(!Number.isInteger(v.leads)||!Number.isInteger(v.visits)||!Number.isInteger(v.orders))error.push('咨询/到店/成交必须为整数');if(error.length)return {error};const unit=v.revenue-v.variable;const marketing=v.leads*v.cpl+v.fixed+v.hours*v.hourly;const net=v.orders*unit-marketing;return {unit,marketing,net,conv:v.leads?v.orders/v.leads:null,cac:v.orders?marketing/v.orders:null,margin:v.orders*v.revenue?net/(v.orders*v.revenue):null,error:[]};}

@@ -13,6 +13,8 @@ SERVICE='https://metaver.vip/services'
 HOME='https://metaver.vip/'
 CORP='https://www.a6no1.cn/'
 PDF_PUBLIC='downloads/local-business-ai-growth-handbook-guide.pdf'
+# Historical source-ledger review date; never confuse it with today's verification.
+SOURCE_LEDGER_DATE='2026-11-10'
 phases=['定位','经营','需求','发现','内容','AI生产','生产','转化','成交','复购','数据','规模化','风险']
 def h(s):return E(str(s),quote=True)
 def link(path,depth=0):return ('../'*depth)+path
@@ -31,7 +33,9 @@ def foot(depth=0):
 def page(title,desc,content,filename,depth=0,active='',js=True):
     path=filename
     canonical=SITE+path
-    head=f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fafbfe"><meta name="description" content="{h(desc)}"><meta property="og:title" content="{h(title)}"><meta property="og:description" content="{h(desc)}"><meta property="og:type" content="website"><meta property="og:image" content="{SITE}assets/social-preview.svg"><link rel="canonical" href="{h(canonical)}"><link rel="icon" type="image/svg+xml" href="{link('assets/favicon.svg',depth)}"><link rel="stylesheet" href="{link('assets/style.css',depth)}"><title>{h(title)} · 本地生意 AI 获客保姆级攻略</title><script type="application/ld+json">{json.dumps({'@context':'https://schema.org','@type':'WebPage','name':title,'description':desc,'author':{'@type':'Person','name':'AI 酋长 Andy'},'isPartOf':{'@type':'CreativeWork','name':'本地生意 AI 获客保姆级攻略'}},ensure_ascii=False)}</script></head>'''
+    schema={'@context':'https://schema.org','@type':'WebPage','name':title,'description':desc,'url':canonical,'inLanguage':'zh-CN','dateModified':D['updated'],'author':{'@type':'Person','name':'AI 酋长 Andy','url':HOME},'isPartOf':{'@type':'WebSite','name':D['title'],'url':SITE}}
+    if filename=='sources.html':schema['citation']=[item['url'] for item in D['sources']]
+    head=f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fafbfe"><meta name="description" content="{h(desc)}"><meta property="og:title" content="{h(title)}"><meta property="og:description" content="{h(desc)}"><meta property="og:type" content="website"><meta property="og:image" content="{SITE}assets/social-preview.svg"><link rel="canonical" href="{h(canonical)}"><link rel="icon" type="image/svg+xml" href="{link('assets/favicon.svg',depth)}"><link rel="stylesheet" href="{link('assets/style.css',depth)}"><title>{h(title)} · 本地生意 AI 获客保姆级攻略</title><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script></head>'''
     script=f'<script defer src="{link("assets/app.js",depth)}"></script>' if js else ''
     return head+f'<body>{nav(depth,active)}<main>{content}</main>{foot(depth)}<div id="toast" role="status" aria-live="polite"></div>{script}</body></html>'
 def card(ch,depth=0):
@@ -66,7 +70,7 @@ def tools():
     form='''<div class="calc-grid"><label>每笔真实实收（元）<input type="number" id="revenue" min="0" step="0.01" value="400"></label><label>单笔变动成本（元）<input type="number" id="variable" min="0" step="0.01" value="120"></label><label>每条线索获客成本（元）<input type="number" id="cpl" min="0" step="0.01" value="25"></label><label>本月合格咨询（条）<input type="number" id="leads" min="0" step="1" value="30"></label><label>到店数（次）<input type="number" id="visits" min="0" step="1" value="15"></label><label>实际成交（单）<input type="number" id="orders" min="0" step="1" value="6"></label><label>其他固定新增营销费（元）<input type="number" id="fixed" min="0" step="0.01" value="0"></label><label>新增营销人力工时（小时）<input type="number" id="hours" min="0" step="0.1" value="6"></label><label>每小时新增人力成本（元）<input type="number" id="hourly" min="0" step="0.01" value="35"></label></div><p class="calc-disclaimer">默认数字均为<strong>教学假设</strong>，不是行业平均和任何真实门店的成绩。请替换为自己的记录。测算未含房租等既有固定成本，也不代表会计净利润。</p><div id="calcErrors" aria-live="polite"></div><div class="metrics" aria-live="polite"><div><small>单笔贡献毛利</small><strong id="unitContribution">—</strong></div><div><small>获客线索 → 成交率</small><strong id="conv">—</strong></div><div><small>本期新增净贡献</small><strong id="net">—</strong></div><div><small>每单新增获客总成本</small><strong id="cac">—</strong></div></div><p id="calcInsight" class="hint"></p><button type="button" class="btn secondary" id="exportCalc">导出测算说明 TXT ↗</button><button type="button" class="btn tiny outline" id="resetCalc">恢复教学示例</button>'''
     checks=[('能在高德找到店','amap'),('能在百度地图找到店','baidu'),('地址/营业时间正确','hours'),('有可信的门头与服务图片','images'),('价格边界可读','pricing'),('真实客户问题至少10条','questions'),('有至少3条可证明内容','content'),('主页3步内能咨询','entry'),('有线索来源台账','tracking'),('有权限/隐私检查','privacy')]
     checklist=''.join(f'<label class="audit-row"><input type="checkbox" data-audit="{k}"><span>{h(t)}</span></label>' for t,k in checks)
-    return f'''<div class="container page-pad">{titleblock('MEASURE, NOT GUESS','先测算，再花钱。','不看单条爆款带来多少“可能收入”；只用你输入的订单数据算边际贡献。')}<section class="tool-card"><div class="section-header compact"><h2>获客与利润测算器</h2><p>计算公式公开可复核：净贡献 = 订单 × (实收 - 变动成本) - 线索 × 单条获客成本 - 额外推广费 - 新增人力成本。</p></div>{form}</section><section class="tool-card"><div class="section-header compact"><h2>门店 10 项体检</h2><p>完成后建议优先修复最影响真实咨询的断点，而非盲目增加内容数量。</p></div><div class="audit-grid">{checklist}</div><div class="audit-score">已通过 <strong id="auditCount">0 / 10</strong></div></section>{brand_card()}</div>'''
+    return f'''<div class="container page-pad">{titleblock('MEASURE, NOT GUESS','先测算，再花钱。','不看单条爆款带来多少“可能收入”；只用你输入的订单数据算边际贡献。')}<section class="tool-card"><div class="section-header compact"><h2>获客与利润测算器</h2><p>计算公式公开可复核：净贡献 = 订单 × (实收 - 变动成本) - 线索 × 单条获客成本 - 额外推广费 - 新增人力成本。</p></div>{form}</section><section class="tool-card"><div class="section-header compact"><h2>门店 10 项体检</h2><p>完成后建议优先修复最影响真实咨询的断点，而非盲目增加内容数量。</p></div><div class="audit-grid">{checklist}</div><div class="audit-score" aria-live="polite">已通过 <strong id="auditCount">0 / 10</strong></div><div class="audit-actions"><button type="button" class="btn secondary" id="exportAudit">下载门店体检 TXT</button><button type="button" class="btn tiny outline" id="resetAudit">重置体检</button></div><p class="calc-disclaimer">所有勾选只保存在当前浏览器；下载包含你自己的体检选项，不含订单/客户数据。默认未勾选不等于检查不合格。</p></section>{brand_card()}</div>'''
 
 def promptpage():
     cards=''.join(f'''<article class="prompt-card"><div class="prompt-head"><span class="eyebrow">PROMPT {h(x['id'])}</span><button type="button" class="btn tiny outline copy" data-copy-target="prompt-{h(x['id'])}">复制提示词</button></div><h2>{h(x['title'])}</h2><pre id="prompt-{h(x['id'])}">{h(x['body'])}</pre></article>''' for x in D['prompts'])
@@ -88,7 +92,7 @@ def casespage():
 
 def sourcepage():
     cards=''.join(f'<article class="source-card"><h2>{h(x["name"])}</h2><p>{h(x["supports"])}</p><a href="{h(x["url"])}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a></article>' for x in D['sources'])
-    return f'<div class="container page-pad">{titleblock("PRIMARY SOURCES","只给可核查的官方入口。","已核对公开官方页面或应用商店官方说明；具体资质、收费和后台字段以平台当前规则为准。") }<div class="sources-grid">{cards}</div><div class="note warn"><strong>权威边界</strong><p>教程中的 ROI 模型、内容方法、30 天计划是作者提出的实践框架，并非平台官方承诺。任何平台的算法、入驻门槛和收费都可能变化；广告内容必须可辨识且真实。</p></div></div>'
+    return f'<div class="container page-pad">{titleblock("PRIMARY SOURCES","只给可核查的官方入口。","来源按历史台账整理，链接可查；不表示全部平台页面或后台规则今天完成核验。具体资质、费用与政策以平台现行官方要求为准。") }<div class="sources-grid">{cards}</div><p class="source-date">来源台账上次整理：<time datetime="{SOURCE_LEDGER_DATE}">{SOURCE_LEDGER_DATE}</time>（不是实时核验）。如官方入口无法访问，请勿自行假定规则不变。</p><div class="note warn"><strong>权威边界</strong><p>教程中的 ROI 模型、内容方法、30 天计划是作者提出的实践框架，并非平台官方承诺。任何平台的算法、入驻门槛和收费都可能变化；广告内容必须可辨识且真实。</p></div></div>'
 
 def privacy():
     return f'''<div class="container page-pad">{titleblock('PRIVACY BY DESIGN','这份教程不需要知道你是谁。','保姆级项目提供方法、模板和计算器；不会收集你的客户名单或经营后台。')}<div class="prose"><h2>公开案例做了哪些处理？</h2><p>有一个“家人从事汽车服务”的匿名化场景，仅保留行业层面的运营问题，不暴露店名、地址、所在城市、亲属身份、时间线、客户数量、车牌、客户数据、营收或可反向识别的经营特征。其他五个案例均为模拟教学。</p><h2>哪些东西绝不能上传公开仓库？</h2><p>客户姓名和手机号、聊天原文、家庭住址、身份证和营业执照扫描件、车牌、精确定位信息、店铺后台截图、合同和未公开的经营账目。示例 CSV 只包含合成样例与空白项。</p><h2>工具如何处理数据？</h2><p>进度勾选与店铺体检状态只保存在当前浏览器的 localStorage，不传至服务器。获客测算器仅在浏览器内计算；导出文件由你自行保管。若开启浏览器的跨设备同步或使用公共电脑，请自行控制隐私风险。</p><h2>如何合规使用 AI？</h2><p>上传任何文本前先脱敏。所有图片应确认肖像权与素材授权。不得编造评价、成交额、专业资质或维修结论。公开服务宣传遵守广告规则，平台入驻需要的敏感证件仅提交至核实过的官方后台。</p><h2>作者的广告如何区分？</h2><p>本项目的星觉科技服务链接均标记为“广告 · 作者商业服务”，与免费教程正文区分。免费开源内容无需购买服务即可使用。</p></div>{brand_card()}</div>'''
@@ -133,8 +137,8 @@ def build():
     from xml.sax.saxutils import escape as X
     urls=''.join(f'<url><loc>{X(SITE+name)}</loc><lastmod>{D["updated"]}</lastmod></url>' for name in pages)
     (OUT/'sitemap.xml').write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',encoding='utf-8')
-    (OUT/'robots.txt').write_text('User-agent: *\\nAllow: /\\nSitemap: '+SITE+'sitemap.xml\\n',encoding='utf-8')
-    (OUT/'llms.txt').write_text('# 本地生意 AI 获客保姆级攻略\\n\\n官方站点：'+SITE+'\\n免费PDF：'+SITE+PDF_PUBLIC+'\\n章节索引：'+SITE+'index.html#chapters\\n作者：AI 酋长 Andy\\n核对来源：'+SITE+'sources.html\\n使用前请复核平台最新规则；教学模拟不是经营结果。\\n',encoding='utf-8')
+    (OUT/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+SITE+'sitemap.xml\n',encoding='utf-8')
+    (OUT/'llms.txt').write_text('# 本地生意 AI 获客保姆级攻略\n\n官方站点：'+SITE+'\n免费PDF：'+SITE+PDF_PUBLIC+'\n章节索引：'+SITE+'index.html#chapters\n作者：AI 酋长 Andy\n核对来源：'+SITE+'sources.html\n使用前请复核平台最新规则；教学模拟不是经营结果。\n',encoding='utf-8')
     (OUT/'.nojekyll').write_text('',encoding='utf-8')
     (OUT/'404.html').write_text(pages['index.html'],encoding='utf-8')
     print(f'Built {len(pages)} content pages +404; output={OUT}')
