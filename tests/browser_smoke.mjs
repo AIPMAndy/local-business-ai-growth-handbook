@@ -4,7 +4,7 @@
  * Validates local data, calculation, search, export and PDF download.
  */
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const base = (process.env.SITE_URL || 'http://127.0.0.1:8766/').replace(/\/?$/, '/');
@@ -85,6 +85,32 @@ try {
   assert.match((await calcDownload).suggestedFilename(), /\.txt$/);
   await page.screenshot({ path: 'qa/browser/local-tools-390.png', fullPage: true });
 
+  assert.equal(await page.locator('[data-audit]').count(),10,'Keep all 10 diagnostic questions');
+  await page.locator('[data-audit]').first().check();
+  await page.locator('[data-audit]').last().check();
+  assert.match(await page.locator('#auditCount').textContent(),/2\s*\/\s*10/);
+  await page.reload();
+  assert.equal(await page.locator('[data-audit]').first().isChecked(),true,'Persist only in browser storage');
+  assert.equal(await page.locator('[data-audit]').last().isChecked(),true);
+  const auditDownload = page.waitForEvent('download');
+  await page.locator('#exportAudit').click();
+  const auditFile = await auditDownload;
+  assert.match(auditFile.suggestedFilename(),/\.txt$/);
+  const auditText = await readFile(await auditFile.path(),'utf8');
+  assert.match(auditText,/门店 10 项体检/);
+  assert.match(auditText,/已通过：2 \/ 10/);
+  assert.match(auditText,/待核验/);
+  assert.match(auditText,/AIPMAndy/);
+  assert.equal((auditText.match(/\d{2}\. \[/g)||[]).length,10,'Each checklist entry is exported');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#resetAudit').click();
+  assert.equal(await page.locator('[data-audit]:checked').count(),0);
+  assert.match(await page.locator('#auditCount').textContent(),/0\s*\/\s*10/);
+  await page.reload();
+  assert.equal(await page.locator('[data-audit]:checked').count(),0,'Reset persists');
+  const toolsBox = await page.evaluate(() => ({width:innerWidth,scroll:document.documentElement.scrollWidth}));
+  assert.ok(toolsBox.scroll <= toolsBox.width+1,'Tools mobile overflow after diagnostic actions');
+  await page.screenshot({ path: 'qa/browser/local-audit-390.png', fullPage: true });
   const pdfResponse = await page.request.get(base + 'downloads/local-business-ai-growth-handbook-guide.pdf');
   assert.equal(pdfResponse.status(), 200);
   const pdf = await pdfResponse.body();
