@@ -15,4 +15,8 @@ assert.equal(calculate({...base,visits:4,orders:6}).error.length>0,true);
 assert.equal(calculate({...base,orders:-1}).error.length>0,true);
 assert.equal(calculate({...base,leads:1.5}).error.length>0,true);
 assert.equal(calculate({...base,revenue:50}).net<0,true);
+assert.ok(calculate({...base,variable:undefined}).error.length);
+assert.ok(calculate({...base,orders:NaN}).error.length);
+assert.ok(calculate({...base,leads:Number.MAX_SAFE_INTEGER+1}).error.length);
+assert.ok(calculate({...base,revenue:Number.MAX_VALUE}).error.length);
 console.log('Calculator tests passed (valid, zero denominators, invalid funnel, negative contribution).');
