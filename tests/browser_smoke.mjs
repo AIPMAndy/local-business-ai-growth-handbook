@@ -77,8 +77,17 @@ try {
   assert.equal(model.result.net, 500, 'Net contribution formula regression');
   await page.locator('#visits').fill('11');
   assert.match(await page.locator('#calcErrors').textContent(), /到店数不能大于合格咨询数/);
+  assert.equal(await page.locator('#exportCalc').isDisabled(), true, 'Invalid current input cannot export previous valid result');
+  assert.equal(await page.evaluate(() => window.__localBusinessCalc), null);
+  assert.equal(await page.locator('#net').textContent(), '—');
+  await page.locator('#clearCalc').click();
+  for (const field of Object.keys(values)) assert.equal(await page.locator('#' + field).inputValue(), '');
+  assert.equal(await page.locator('#exportCalc').isDisabled(), true);
+  await page.locator('#revenue').fill('500');
+  assert.equal(await page.locator('#exportCalc').isDisabled(), true, 'Unknown inputs must not become zero');
   await page.locator('#resetCalc').click();
   assert.equal(await page.locator('#revenue').inputValue(), '400');
+  assert.equal(await page.locator('#exportCalc').isEnabled(), true);
   assert.equal(await page.locator('#calcErrors').textContent(), '');
   const calcDownload = page.waitForEvent('download');
   await page.locator('#exportCalc').click();
