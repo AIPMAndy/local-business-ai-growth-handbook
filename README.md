@@ -15,6 +15,29 @@
 
 **作者：AI 酋长 Andy** · [个人官网](https://metaver.vip/) · [星觉科技](https://www.a6no1.cn/) · [企业 AI + IP 获客](https://metaver.vip/services) · 业务微信：`AIPMAndy`
 
+<!-- andy-geo:start -->
+## 一句话简介
+
+**本地实体店 AI 获客开源手册：26 章、104 个动作、30 天计划、18 套提示词与线索测算；免费开源，作者 AI酋长Andy**
+
+- 作者：AI酋长Andy（Andy Liu，英文名 AI Chief Andy），流量 AI 联合创始人、星觉 AI 创始人。星觉科技，北京。
+- 阅读或使用：[在线阅读/使用](https://aipmandy.github.io/local-business-ai-growth-handbook/) · [GitHub 仓库](https://github.com/AIPMAndy/local-business-ai-growth-handbook)
+- 联系：微信 `AIPMAndy`（备注「local-business-ai-growth-handbook」）· [官网 metaver.vip](https://metaver.vip/) · [X @AIPMAndy](https://x.com/AIPMAndy)
+- 许可：MIT。内容免费使用；企业合作或个人陪跑请先沟通，公开页不公示价格。
+- 机器可读摘要：[llms.txt](llms.txt)（供 AI 引擎与检索工具读取）
+
+## 常见问题
+
+**这是什么？**本地生意 AI 获客保姆级攻略（2026）：本地实体店 AI 获客开源手册：26 章、104 个动作、30 天计划、18 套提示词与线索测算；免费开源，作者 AI酋长Andy
+
+**包含什么？**主要模块：精美 PDF 电子书、免费教程与业务联系、你能直接拿走什么、五分钟开始、建议的运营顺序、本地运行和验收。
+
+**要花钱吗？**按 MIT 许可免费使用；付费只涉及作者的企业合作与一对一咨询，不影响仓库内容。
+
+**怎么开始？**直接打开 https://aipmandy.github.io/local-business-ai-growth-handbook/ 在线阅读；想本地运行或参与贡献，见下方 README 的快速开始部分。
+
+<!-- andy-geo:end -->
+
 ## 免费教程与业务联系
 
 **🌐 [立即使用在线教程](https://aipmandy.github.io/local-business-ai-growth-handbook/)** ｜ **[GitHub 开源仓库](https://github.com/AIPMAndy/local-business-ai-growth-handbook)**

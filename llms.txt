@@ -1,0 +1,48 @@
+# 本地生意 AI 获客保姆级攻略（2026）
+
+> 本地实体店 AI 获客开源手册：26 章、104 个动作、30 天计划、18 套提示词与线索测算；免费开源，作者 AI酋长Andy
+
+- 作者：AI酋长Andy（AIPMAndy），官网 https://metaver.vip/
+- 开源仓库：https://github.com/AIPMAndy/local-business-ai-growth-handbook
+- 在线地址：https://aipmandy.github.io/local-business-ai-growth-handbook/
+- 许可：MIT
+- 语言：中文（zh-CN）
+- 最近更新：2026-11-24
+
+## 这是什么
+
+免费下载《本地生意 AI 获客攻略》pdf/local-business-ai-growth-handbook-guide.pdf · 直接下载 PDFhttps://github.com/AIPMAndy/local-business-ai-growth-handbook/raw/refs/heads/main/pdf/local-business-ai-growth-handbook-guide.pdf
+71 页 · A5 手机阅读版 · 可点击目录 · 0.82 MB  
+整理日期：2026-11-13。包含完整实操正文、案例、模板与原始来源；平台规则与价格沿用原资料的核查日期。
+
+## 内容目录
+
+- 精美 PDF 电子书
+- 免费教程与业务联系
+- 你能直接拿走什么
+- 五分钟开始
+- 建议的运营顺序
+- 本地运行和验收
+- 项目目录
+- 广告与服务入口（明确披露）
+- 真实案例与隐私边界
+- 官方资料与平台边界
+- 发布
+- 授权
+
+## 关键事实
+
+- 名称：本地生意 AI 获客保姆级攻略（2026）
+- 类型：中文开源项目 / 学习手册
+- 内容规模：26 章
+- 许可：MIT
+- 语言：中文
+- 最近更新：2026-11-24
+- 仓库：https://github.com/AIPMAndy/local-business-ai-growth-handbook
+
+## 相关链接
+
+- [作者官网](https://metaver.vip/)
+- [GitHub 主页](https://github.com/AIPMAndy/AIPMAndy)
+- [开源总目录](https://aipmandy.github.io/)
+- [机器可读摘要](https://aipmandy.github.io/local-business-ai-growth-handbook/llms.txt)
